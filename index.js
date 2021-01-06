@@ -8,7 +8,7 @@
 	, freegeoip = require('node-freegeoip');
 
 // Configuration.
-var appUrl = process.env.APP_URL || 'https://plex-de-jeremy-bot.herokuapp.com';
+var appUrl = process.env.APP_URL || 'https://²-de-jeremy-bot.herokuapp.com';
 var webhookKey = process.env.DISCORD_WEBHOOK_KEY || '796482251575525396/dVu5hu7BoST6YwJMb9DCKVawuCTQYY8G43kau7ApIKkofkE2oejXkQM14rCwtr5I3jXm';
 
 var redisClient = redis.createClient(process.env.REDISCLOUD_URL, { return_buffers: true });
@@ -69,27 +69,20 @@ function formatSummary(summary) {
 	return ret;
 }
 
-function notifyDiscord(imageUrl, payload, location, action) {
-	var locationText = '';
-	if (location) {
-		if (location.city) {
-			locationText = ` near ${location.city}, ${(location.country_code === 'US' ? location.region_name : location.country_name)}`;
-		}
-		else {
-			locationText = `, ${(location.country_code === 'US' ? location.region_name : location.country_name)}`;
-		}
-	}
+function notifyDiscord(imageUrl, payload, action) {
+	var data;
 
-	const data = {
+	if(action == "uploaded") {
+		data = {
 		"content": '',
-		"username": 'Plex',
-		"avatar_url": appUrl + '/plex-icon.png',
+		"username": 'JeremBot',
+		"avatar_url": appUrl + '/user.jpg',
 		"embeds": [
 			{
 				"title": formatTitle(payload.Metadata),
 				"description": formatSubtitle(payload.Metadata) + formatSummary(payload.Metadata.summary),
 				"footer": {
-					"text": `${action} by ${payload.Account.title} on ${payload.Player.title} from ${payload.Server.title} ${locationText}`,
+					"text": `${action} par ${payload.Account.title}`,
 					"icon_url": payload.Account.thumb
 				},
 				"thumbnail": {
@@ -99,16 +92,39 @@ function notifyDiscord(imageUrl, payload, location, action) {
 				}
 			}
 		]
-	};
-
-	request.post(`https://discordapp.com/api/webhooks/${webhookKey}`,
-		{ json: data },
-		function (error, response, body) {
-			if (!error && response.statusCode === 200) {
-				//console.log(body)
+		};
+	}else{
+		data = {
+		"content": '',
+		"username": 'JeremBot',
+		"avatar_url": appUrl + '/user.jpg',
+		"embeds": [
+			{
+				"title": formatTitle(payload.Metadata),
+				"description": 'Bingo ! Le téléchargement de ' + formatTitle(payload.Metadata) + " vient de se terminer ! Connectez-vous à Plex pour le visionner/l'écouter !",
+				"footer": {
+					"text": 'le saviez-vous ? une abeille, ça pique !',
+					"icon_url": appUrl + '/user.jpg'
+				},
+				"thumbnail": {
+					"url": imageUrl,
+					"height": 200,
+					"width": '200'
+				}
 			}
-		}
-	);
+		]
+		};
+	}
+
+		request.post(`https://discordapp.com/api/webhooks/${webhookKey}`,
+			{ json: data },
+			function (error, response, body) {
+				if (!error && response.statusCode === 200) {
+					//console.log(body)
+				}
+			}
+		);
+		
 }
 
 app.post('/', upload.single('thumb'), function (req, res, next) {
@@ -134,8 +150,6 @@ app.post('/', upload.single('thumb'), function (req, res, next) {
 		}
 
 		if ((payload.event === 'media.scrobble' && isVideo) || payload.event === 'media.rate' || payload.event === 'media.play') {
-			// Geolocate player.
-			freegeoip.getLocation(payload.Player.publicAddress, function (err, location) {
 
 				var action;
 				if (payload.event === 'media.scrobble' || payload.event === 'media.play') {
@@ -152,43 +166,19 @@ app.post('/', upload.single('thumb'), function (req, res, next) {
 
 				// Send the event to Discord.
 				redisClient.get(key, function (err, reply) {
-					if (!location || (location && location.city && location.city.length > 1)) {
+
 						if (reply) {
-							notifyDiscord(appUrl + '/images/' + key, payload, location, action);
+							notifyDiscord(appUrl + '/images/' + key, payload, action);
 						} else {
-							notifyDiscord(null, payload, location, action);
+							notifyDiscord(null, payload, action);
 						}
-					}
-					else {
-						console.log('location city missing, trying OSM lat lng lookup');
 
-						var options = {
-							url: `http://nominatim.openstreetmap.org/reverse?format=json&lat=${location.latitude}&lon=${location.longitude}&accept-language=en`,
-							method: 'GET',
-							headers: {
-								'User-Agent': 'hoglund.joakim@gmail.com'
-							}
-						};
-
-						request(options, function (error, response, body) {
-							if (error) console.log('OSM lookup error', error);
-
-							if (!error && response.statusCode === 200) {
-								location = JSON.parse(body).address;
-								location.region_name = location.state;
-								location.country_name = location.country;
-							}
-
-							if (reply) {
-								notifyDiscord(appUrl + '/images/' + key, payload, location, action);
-							} else {
-								notifyDiscord(null, payload, location, action);
-							}
-						}
-						);
-					}
 				});
-			});
+
+		}else if(playload.event == 'library.new') {
+
+
+
 		}
 	}
 
