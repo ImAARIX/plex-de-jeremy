@@ -71,8 +71,31 @@ function formatSummary(summary) {
 
 function notifyDiscord(imageUrl, payload, action) {
 	var data;
+	const isVideo = payload.Metadata.librarySectionType === 'movie' || payload.Metadata.librarySectionType === 'show';
+	const isAudio = payload.Metadata.librarySectionType === 'artist';
 
 	if(action == "uploaded") {
+		data = {
+		"content": '',
+		"username": 'JeremBot',
+		"avatar_url": appUrl + '/images/user.jpg',
+		"embeds": [
+			{
+				"title": formatTitle(payload.Metadata),
+				"description": 'Bingo ! Le téléchargement de ' + formatTitle(payload.Metadata) + " vient de se terminer ! Connectez-vous à Plex pour le visionner !",
+				"footer": {
+					"text": 'le saviez-vous ? une abeille, ça pique !',
+					"icon_url": appUrl + '/images/user.jpg'
+				},
+				"thumbnail": {
+					"url": imageUrl,
+					"height": 200,
+					"width": '200'
+				}
+			}
+		]
+		};
+	}else{
 		data = {
 		"content": '',
 		"username": 'JeremBot',
@@ -93,27 +116,6 @@ function notifyDiscord(imageUrl, payload, action) {
 			}
 		]
 		};
-	}else{
-		data = {
-		"content": '',
-		"username": 'JeremBot',
-		"avatar_url": appUrl + '/user.jpg',
-		"embeds": [
-			{
-				"title": formatTitle(payload.Metadata),
-				"description": 'Bingo ! Le téléchargement de ' + formatTitle(payload.Metadata) + " vient de se terminer ! Connectez-vous à Plex pour le visionner/l'écouter !",
-				"footer": {
-					"text": 'le saviez-vous ? une abeille, ça pique !',
-					"icon_url": appUrl + '/user.jpg'
-				},
-				"thumbnail": {
-					"url": imageUrl,
-					"height": 200,
-					"width": '200'
-				}
-			}
-		]
-		};
 	}
 
 		request.post(`https://discordapp.com/api/webhooks/${webhookKey}`,
@@ -124,7 +126,7 @@ function notifyDiscord(imageUrl, payload, action) {
 				}
 			}
 		);
-		
+
 }
 
 app.post('/', upload.single('thumb'), function (req, res, next) {
@@ -135,7 +137,7 @@ app.post('/', upload.single('thumb'), function (req, res, next) {
 	if (payload.user === true && payload.Metadata && (isAudio || isVideo)) {
 		var key = sha1(payload.Server.uuid + payload.Metadata.guid);
 
-		if (payload.event === 'media.play' || payload.event === 'media.rate') {
+		if (payload.event === 'media.play' || payload.event === 'media.rate' || payload.event === 'library.new') {
 			// Save the image.
 			if (req.file && req.file.buffer) {
 				jimp.read(req.file.buffer)
@@ -156,12 +158,14 @@ app.post('/', upload.single('thumb'), function (req, res, next) {
 					action = 'played';
 				} else if (payload.event === 'media.rate') {
 					if (payload.rating > 0) {
-						action = 'rated ';
+						action = 'rated';
 						for (var i = 0; i < payload.rating / 2; i++)
 							action += '★';
 					} else {
 						action = 'unrated';
 					}
+				}else if(payload.event === 'library.new'){
+					action = 'uploaded';
 				}
 
 				// Send the event to Discord.
@@ -174,10 +178,6 @@ app.post('/', upload.single('thumb'), function (req, res, next) {
 						}
 
 				});
-
-		}else if(playload.event == 'library.new') {
-
-
 
 		}
 	}
