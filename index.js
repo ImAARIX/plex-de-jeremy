@@ -151,7 +151,7 @@ app.post('/', upload.single('thumb'), function (req, res, next) {
 			}
 		}
 
-		if ((payload.event === 'media.scrobble' && isVideo) || payload.event === 'media.rate' || payload.event === 'media.play') {
+		if ((payload.event === 'media.scrobble' && isVideo) || payload.event === 'media.rate' || payload.event === 'media.play' || payload.event === 'library.new') {
 
 				var action;
 				if (payload.event === 'media.scrobble' || payload.event === 'media.play') {
