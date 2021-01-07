@@ -8,7 +8,7 @@
 	, freegeoip = require('node-freegeoip');
 
 // Configuration.
-var appUrl = process.env.APP_URL || 'https://²-de-jeremy-bot.herokuapp.com';
+var appUrl = process.env.APP_URL || 'https://plex-de-jeremy-bot.herokuapp.com';
 var webhookKey = process.env.DISCORD_WEBHOOK_KEY || '796482251575525396/dVu5hu7BoST6YwJMb9DCKVawuCTQYY8G43kau7ApIKkofkE2oejXkQM14rCwtr5I3jXm';
 
 var redisClient = redis.createClient(process.env.REDISCLOUD_URL, { return_buffers: true });
@@ -74,7 +74,7 @@ function notifyDiscord(imageUrl, payload, action) {
 	const isVideo = payload.Metadata.librarySectionType === 'movie' || payload.Metadata.librarySectionType === 'show';
 	const isAudio = payload.Metadata.librarySectionType === 'artist';
 
-	if(action == "uploaded") {
+	if(action === "uploaded") {
 		data = {
 		"content": '',
 		"username": 'JeremBot',
@@ -99,7 +99,7 @@ function notifyDiscord(imageUrl, payload, action) {
 		data = {
 		"content": '',
 		"username": 'JeremBot',
-		"avatar_url": appUrl + '/user.jpg',
+		"avatar_url": appUrl + '/images/user.jpg',
 		"embeds": [
 			{
 				"title": formatTitle(payload.Metadata),
