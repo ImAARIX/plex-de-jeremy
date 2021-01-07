@@ -100,14 +100,14 @@ function notifyDiscord(imageUrl, payload, action) {
 			data = {
 			"content": '',
 			"username": 'JeremBot',
-			"avatar_url": appUrl + '/images/user.jpg',
+			"avatar_url": appUrl + '/user.jpg',
 			"embeds": [
 				{
 					"title": formatTitle(payload.Metadata),
 					"description": 'Bingo ! Le téléchargement de ' + formatTitle(payload.Metadata) + " vient de se terminer ! Connectez-vous à Plex pour l'écouter !",
 					"footer": {
 						"text": 'le saviez-vous ? une abeille, ça pique !',
-						"icon_url": appUrl + '/images/user.jpg'
+						"icon_url": appUrl + '/user.jpg'
 					},
 					"thumbnail": {
 						"url": imageUrl,
