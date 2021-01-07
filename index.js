@@ -75,47 +75,70 @@ function notifyDiscord(imageUrl, payload, action) {
 	const isAudio = payload.Metadata.librarySectionType === 'artist';
 
 	if(action === "uploaded") {
-		data = {
-		"content": '',
-		"username": 'JeremBot',
-		"avatar_url": appUrl + '/images/user.jpg',
-		"embeds": [
-			{
-				"title": formatTitle(payload.Metadata),
-				"description": 'Bingo ! Le téléchargement de ' + formatTitle(payload.Metadata) + " vient de se terminer ! Connectez-vous à Plex pour le visionner !",
-				"footer": {
-					"text": 'le saviez-vous ? une abeille, ça pique !',
-					"icon_url": appUrl + '/images/user.jpg'
-				},
-				"thumbnail": {
-					"url": imageUrl,
-					"height": 200,
-					"width": '200'
+		if(isVideo){
+			data = {
+			"content": '',
+			"username": 'JeremBot',
+			"avatar_url": appUrl + '/images/user.jpg',
+			"embeds": [
+				{
+					"title": formatTitle(payload.Metadata),
+					"description": 'Bingo ! Le téléchargement de ' + formatTitle(payload.Metadata) + " vient de se terminer ! Connectez-vous à Plex pour le visionner !",
+					"footer": {
+						"text": 'le saviez-vous ? une abeille, ça pique !',
+						"icon_url": appUrl + '/images/user.jpg'
+					},
+					"thumbnail": {
+						"url": imageUrl,
+						"height": 200,
+						"width": '200'
+					}
 				}
-			}
-		]
-		};
+			]
+			};
+		}else if(isAudio){
+			data = {
+			"content": '',
+			"username": 'JeremBot',
+			"avatar_url": appUrl + '/images/user.jpg',
+			"embeds": [
+				{
+					"title": formatTitle(payload.Metadata),
+					"description": 'Bingo ! Le téléchargement de ' + formatTitle(payload.Metadata) + " vient de se terminer ! Connectez-vous à Plex pour l'écouter !",
+					"footer": {
+						"text": 'le saviez-vous ? une abeille, ça pique !',
+						"icon_url": appUrl + '/images/user.jpg'
+					},
+					"thumbnail": {
+						"url": imageUrl,
+						"height": 200,
+						"width": '200'
+					}
+				}
+			]
+			};
+		}
 	}else{
-		data = {
-		"content": '',
-		"username": 'JeremBot',
-		"avatar_url": appUrl + '/images/user.jpg',
-		"embeds": [
-			{
-				"title": formatTitle(payload.Metadata),
-				"description": formatSubtitle(payload.Metadata) + formatSummary(payload.Metadata.summary),
-				"footer": {
-					"text": `${action} par ${payload.Account.title}`,
-					"icon_url": payload.Account.thumb
-				},
-				"thumbnail": {
-					"url": imageUrl,
-					"height": 200,
-					"width": '200'
-				}
-			}
-		]
-		};
+		//data = {
+		//"content": '',
+		//"username": 'JeremBot',
+		//"avatar_url": appUrl + '/images/user.jpg',
+		//"embeds": [
+		//	{
+		//		"title": formatTitle(payload.Metadata),
+		//		"description": formatSubtitle(payload.Metadata) + formatSummary(payload.Metadata.summary),
+		//		"footer": {
+		//			"text": `${action} par ${payload.Account.title}`,
+		//			"icon_url": payload.Account.thumb
+		//		},
+		//		"thumbnail": {
+		//			"url": imageUrl,
+		//			"height": 200,
+		//			"width": '200'
+		//		}
+		//	}
+		//]
+		//};
 	}
 
 		request.post(`https://discordapp.com/api/webhooks/${webhookKey}`,
